@@ -4,8 +4,10 @@
 // Доступ — той самий логін/пароль, що й на сторінці.
 
 const KEY = 'dim:temails';
-const URL_ = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-const TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+// Шукаємо змінні Upstash з будь-яким префіксом (KV_, STORAGE_, UPSTASH_REDIS_ тощо).
+const envFind = re => { const k = Object.keys(process.env).find(k => re.test(k) && process.env[k]); return k ? process.env[k].trim() : ''; };
+const URL_ = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || envFind(/_REST_API_URL$|REDIS_REST_URL$/);
+const TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || envFind(/_REST_API_TOKEN$|REDIS_REST_TOKEN$/) ;
 
 async function redis(cmd) {
   const r = await fetch(URL_, {
@@ -29,7 +31,7 @@ function basicOk(req) {
 }
 
 export default async function handler(req, res) {
-  if (!URL_ || !TOKEN) return res.status(500).json({ ok: false, error: 'Сховище не підключене (Vercel → Storage → Upstash Redis).' });
+  if (!URL_ || !TOKEN) return res.status(500).json({ ok: false, error: 'Сховище не підключене (Vercel → Storage → Upstash Redis → Connect, потім Redeploy).', found: Object.keys(process.env).filter(k => /KV|REDIS|UPSTASH|STORAGE/i.test(k)) });
   if (!basicOk(req)) return res.status(401).json({ ok: false, error: 'Потрібен вхід.' });
   try {
     if (req.method === 'GET') {
