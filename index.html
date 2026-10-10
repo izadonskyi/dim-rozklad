@@ -1,4 +1,5 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.tem{display:grid;gap:4px;padding:8px 2px 4px}.tem label{font-size:12px;font-weight:600;color:var(--mute)}.temr{display:flex;gap:6px}.temr input{flex:1;min-width:0;padding:7px 9px;border:1px solid var(--line);border-radius:3px;font:inherit;font-size:13.5px;background:var(--card);color:var(--fg)}.tem small{font-size:11.5px;color:var(--faint)}.tln small.tmail{color:var(--mute)}.tln small.tmail.none{color:var(--faint);font-style:italic}
+</style></head><body>
 <title>DIM Розклад</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <style>
@@ -1716,7 +1717,7 @@ function hoursView(){
 `;
   const hon=S.hopen&&me;
   const panel=`<aside class="hp" aria-label="Робочі години викладачів"><div class="tlist">${c.teachers.map(t=>{const n=tplOf(t.id).length,tg=epw(t.id),lb=tLocBad(t.id),miss=!n?'немає слотів':lb?`поза локацією ${lb}`:n<tg?`бракує ${tg-n}`:n>tg?`зайві ${n-tg}`:'',on=hon&&t.id===me;
-    return `<div class="tli ${on?'on':''}"><button class="tlh" data-a="hcur" data-v="${t.id}" aria-expanded="${on}"><span class="av">${initials(t.name)}</span><span class="tln"><b>${esc(t.name)}</b><small>${n?`${pl(n,'слот','слоти','слотів')} на тиждень · план ${tg}`:'робочих годин ще немає'}</small></span>${miss?`<em class="tst ${n&&n<tg&&!lb?'warn':'bad'}">${miss}</em>`:'<em class="tst ok">✓</em>'}<i class="tlc ${on?'up':''}"><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></i></button>${on?`<div class="tlb hlb">${BODY}</div>`:''}</div>`}).join('')}</div>
+    return `<div class="tli ${on?'on':''}"><button class="tlh" data-a="hcur" data-v="${t.id}" aria-expanded="${on}"><span class="av">${initials(t.name)}</span><span class="tln"><b>${esc(t.name)}</b>${t.email?`<small class="tmail">${esc(t.email)}</small>`:'<small class="tmail none">email не вказано</small>'}<small>${n?`${pl(n,'слот','слоти','слотів')} на тиждень · план ${tg}`:'робочих годин ще немає'}</small></span>${miss?`<em class="tst ${n&&n<tg&&!lb?'warn':'bad'}">${miss}</em>`:'<em class="tst ok">✓</em>'}<i class="tlc ${on?'up':''}"><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></i></button>${on?`<div class="tlb hlb"><div class="tem"><label for="tem">Email викладача</label><div class="temr"><input id="tem" type="email" value="${esc(t.email||'')}" placeholder="teacher@example.com" autocomplete="off"><button class="btn sm" data-a="tmail" data-v="${t.id}">Зберегти</button></div><small>За цим email адмінка розпізнає теми, надіслані з Make.</small></div>${BODY}</div>`:''}</div>`}).join('')}</div>
   </aside>`;
   return `<div class="cal hcal"><div class="hct"><div class="hctl">Викладачі</div>
   <div class="hctr"><div class="hdate" role="group" aria-label="Період"><button class="ar" data-a="hnav" data-v="-1" aria-label="Попередній період">‹</button><h2 class="hlbl" aria-live="polite">${label}</h2><button class="ar" data-a="hnav" data-v="1" aria-label="Наступний період">›</button></div>
@@ -2207,6 +2208,7 @@ const A={
   dday:v=>SLOTS.forEach((sl,s)=>{if(sl[1]===+v)for(let w=0;w<S.weeks;w++)unwork(key(s,w))}),
   addslot:()=>{const v=document.getElementById('adds').value;if(v==='')return;for(let w=0;w<S.weeks;w++)C().work[cur()].add(key(+v,w))},
   hours:()=>{S.view='hours'},
+  tmail:id=>saveEmail(id),
   hcur:id=>{if(S.cur[S.city]===id&&S.hopen)S.hopen=false;else{S.cur[S.city]=id;S.hopen=true}S.hadd=false;S.hh=null},
   hw:v=>{S.cw=add(S.cw,7*v)},
   hmode:v=>{S.hm=v},
@@ -2523,7 +2525,33 @@ function menu(o){side.hidden=scrim.hidden=!o;mb.setAttribute('aria-expanded',o)}
 mb.onclick=()=>menu(side.hidden);scrim.onclick=()=>menu(false);document.getElementById('menuClose').onclick=()=>menu(false);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')menu(false)});
 (function cleanStart(){const c0=S.city;for(const k in S.data){S.city=k;const c=S.data[k];c.events=[];c.plans={};c.themes={};c.packs=[];c.bands=[];c.locs=[];delete c.hwarn;const w=tws();w.th=[];Object.values(w.fmt).forEach(f=>{f.n=0})}S.city=c0;S.cw=monday(todayIso());S.cmo=todayIso().slice(0,7);S.tpS=monday(todayIso());S.ha=todayIso()})();
-render();
+// ===== Імпорт тем із Make (через /api/themes) =====
+const MK_TYPE={pro_cover:'PC',procover:'PC',pc:'PC',easy:'E',easy_cover:'E',easy_jam:'E',e:'E',improv:'I',improv_jam:'I',i:'I'};
+const MK_CITY={kyiv:'KYIV','київ':'KYIV',kiev:'KYIV',lviv:'LVIV','львів':'LVIV'};
+const nWords=s=>String(s||'').toLowerCase().replace(/[’'`ʼ]/g,'').split(/\s+/).filter(Boolean).sort().join(' ');
+function mkTeacher(city,person){if(!person)return null;const c=S.data[city];if(!c)return null;const em=String(person.email||'').toLowerCase(),nm=nWords(person.name);
+  return (c.teachers.find(t=>t.email&&t.email.toLowerCase()===em)||c.teachers.find(t=>nWords(t.name)===nm)||{}).id||null}
+function importMake(subs){let added=0,skipped=[];const c0=S.city;
+  (subs||[]).forEach(sub=>{const city=MK_CITY[String(sub.city||'').toLowerCase().trim()];if(!city){skipped.push(`невідоме місто «${sub.city}»`);return}S.city=city;const w=tws(),teacher=mkTeacher(city,sub.sentBy);
+    (sub.themes||[]).forEach((th,i)=>{const f=MK_TYPE[String(th.type||'').toLowerCase().trim()],key=`${sub.id||sub.sentAt}#${i}`;
+      if(!f||!w.fmt[f]){skipped.push(`«${th.topic}»: невідомий формат «${th.type}»`);return}
+      if(w.th.some(x=>x.mk===key))return;
+      w.th.push({id:TUID++,f,t:teacher,key:null,name:String(th.topic||'').trim(),ses:null,merge:null,src:!!String(th.topic||'').trim(),mk:key,month:sub.month||'',author:th.addedBy||null,sentBy:sub.sentBy||null});added++})});
+  S.city=c0;return{added,skipped}}
+async function loadMake(){if(!/^https?:/.test(location.protocol))return;try{const r=await fetch('/api/themes',{credentials:'same-origin',cache:'no-store'});if(!r.ok)return;const j=await r.json();const res=importMake(j.submissions||[]);
+  if(res.added||res.skipped.length){S.toast=(res.added?`Підтягнуто ${pl(res.added,'тему','теми','тем')} від викладачів (Make).`:'')+(res.skipped.length?` Пропущено: ${res.skipped.slice(0,3).join('; ')}${res.skipped.length>3?'…':''}`:'');render()}}catch(e){}}
+
+
+const EMRE=/^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+async function saveEmail(id){const el=document.getElementById('tem');const v=(el?el.value:'').trim();const t=C().teachers.find(x=>x.id===id);if(!t)return;
+  if(v&&!EMRE.test(v)){S.toast='Перевірте email — схоже, в ньому помилка.';return}
+  const dup=v&&C().teachers.find(x=>x.id!==id&&(x.email||'').toLowerCase()===v.toLowerCase());if(dup){S.toast=`Цей email уже закріплено за: ${dup.name}.`;return}
+  const old=t.email||'';t.email=v;S.toast=v?`Email для ${t.name} збережено.`:`Email для ${t.name} видалено.`;
+  if(/^https?:/.test(location.protocol)){try{const r=await fetch('/api/teachers',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({city:S.city,id,email:v})});if(!r.ok)throw 0}catch(e){t.email=old;S.toast='Не вдалося зберегти email на сервері. Спробуйте ще раз.';render();return}}
+  render()}
+async function loadEmails(){if(!/^https?:/.test(location.protocol))return;try{const r=await fetch('/api/teachers',{credentials:'same-origin',cache:'no-store'});if(!r.ok)return;const j=await r.json();
+  Object.entries(j.emails||{}).forEach(([k,v])=>{const i=k.indexOf(':'),city=k.slice(0,i),id=k.slice(i+1);const t=S.data[city]&&S.data[city].teachers.find(x=>x.id===id);if(t)t.email=v});render()}catch(e){}}
+render();loadEmails().then(loadMake);
 </script>
 
 </body></html>
