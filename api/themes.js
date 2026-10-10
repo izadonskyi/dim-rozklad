@@ -34,7 +34,8 @@ export default async function handler(req, res) {
   if (!URL_ || !TOKEN) return res.status(500).json({ ok: false, error: 'Сховище не підключене (Vercel → Storage → Upstash Redis → Connect, потім Redeploy).', found: Object.keys(process.env).filter(k => /KV|REDIS|UPSTASH|STORAGE/i.test(k)) });
 
   if (req.method === 'POST') {
-    if (!process.env.MAKE_SECRET || req.headers['x-api-key'] !== process.env.MAKE_SECRET)
+    const secret = (process.env.MAKE_SECRET || '').trim(), got = String(req.headers['x-api-key'] || '').trim();
+    if (!secret || got !== secret)
       return res.status(401).json({ ok: false, error: 'Невірний x-api-key' });
     let b = req.body;
     if (typeof b === 'string') { try { b = JSON.parse(b); } catch { b = null; } }
